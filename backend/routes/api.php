@@ -1,6 +1,18 @@
+use App\Http\Controllers\LxController;
 use App\Http\Controllers\OrderInspectionController;
 
+// 公开接口（不需要认证）
+Route::prefix('v1')->group(function () {
+    Route::post('/register', [LxController::class, 'register']);
+    Route::post('/login', [LxController::class, 'login']);
+});
+
+// 需要认证的接口
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    // 用户接口
+    Route::post('/reset-password', [LxController::class, 'resetPassword']);
+    Route::get('/profile', [LxController::class, 'profile']);
+    Route::put('/profile', [LxController::class, 'updateProfile']);
     // 订单接口
     Route::post('/orders', [OrderInspectionController::class, 'storeOrder']);
     Route::get('/consumer/orders', [OrderInspectionController::class, 'consumerOrderList']);
