@@ -6,20 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('consumer_id')->constrained('users'); // 消费者ID
+            $table->foreignId('purchaser_id')->nullable()->constrained('users'); // 采购商ID
+            $table->decimal('total_amount', 10, 2); // 总金额
+            $table->string('status')->default('pending'); // 订单状态
+            $table->text('shipping_address'); // 收货地址
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('orders');
