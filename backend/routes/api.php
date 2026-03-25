@@ -5,6 +5,10 @@ use App\Http\Controllers\OrderInspectionController;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [LxController::class, 'register']);
     Route::post('/login', [LxController::class, 'login']);
+    
+    // 商品公开接口
+    Route::get('/products', [LxController::class, 'productList']);
+    Route::get('/products/{id}', [LxController::class, 'productDetail']);
 });
 
 // 需要认证的接口
@@ -13,6 +17,11 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     Route::post('/reset-password', [LxController::class, 'resetPassword']);
     Route::get('/profile', [LxController::class, 'profile']);
     Route::put('/profile', [LxController::class, 'updateProfile']);
+    
+    // 商品供应商接口
+    Route::post('/products', [LxController::class, 'storeProduct']);
+    Route::put('/products/{id}', [LxController::class, 'updateProduct']);
+    Route::put('/products/{id}/stock', [LxController::class, 'updateStock']);
     // 订单接口
     Route::post('/orders', [OrderInspectionController::class, 'storeOrder']);
     Route::get('/consumer/orders', [OrderInspectionController::class, 'consumerOrderList']);
