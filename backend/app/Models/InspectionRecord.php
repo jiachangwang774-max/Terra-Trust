@@ -32,7 +32,7 @@ class InspectionRecord extends Model
      */
     public function order()
     {
-        return $this->belongsTo(Orders::class, 'order_id', 'order_id');
+        return $this->belongsTo(Order::class, 'order_id', 'id');
     }
 
     /**
@@ -40,6 +40,6 @@ class InspectionRecord extends Model
      */
     public function purchaser()
     {
-        return $this->belongsTo(User::class, 'purchaser_id', 'user_id');
+        return $this->belongsTo(User::class, 'purchaser_id', 'id');
     }
 }
