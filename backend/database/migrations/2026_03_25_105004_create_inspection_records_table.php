@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('inspection_records', function (Blueprint $table) {
             $table->bigIncrements('inspection_id')->comment('抽检记录ID');
-            $table->bigInteger('order_id')->unique()->comment('关联订单ID');
-            $table->bigInteger('purchaser_id')->comment('执行抽检的采购商ID');
+            $table->unsignedBigInteger('order_id')->unique()->comment('关联订单ID');
+            $table->unsignedBigInteger('purchaser_id')->comment('执行抽检的采购商ID');
             $table->enum('result', ['qualified', 'unqualified'])->comment('抽检结果');
             $table->dateTime('inspection_time')->comment('抽检时间');
             $table->text('remarks')->nullable()->comment('抽检备注');
@@ -19,12 +19,12 @@ return new class extends Migration
 
             // 外键约束
             $table->foreign('order_id')
-                  ->references('order_id')
+                  ->references('id')
                   ->on('orders')
                   ->onDelete('cascade');
             
             $table->foreign('purchaser_id')
-                  ->references('user_id')
+                  ->references('id')
                   ->on('users')
                   ->onDelete('cascade');
             
