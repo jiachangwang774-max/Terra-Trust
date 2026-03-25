@@ -6,19 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained()->onDelete('cascade'); // 关联订单
-            $table->foreignId('product_id')->constrained(); // 关联商品
-            $table->integer('quantity'); // 购买数量
-            $table->decimal('unit_price', 10, 2); // 下单时的单价（快照）
-            $table->timestamps();
+            $table->bigIncrements('order_item_id')->comment('订单项ID');
+            $table->bigInteger('order_id')->comment('所属订单ID');
+            $table->bigInteger('product_id')->comment('商品ID');
+            $table->integer('quantity')->comment('购买数量');
+            $table->decimal('unit_price', 10, 2)->comment('下单时商品单价');
+            
+            // 外键约束
+            $table->foreign('order_id')
+                  ->references('order_id')
+                  ->on('orders')
+                  ->onDelete('cascade');
+            
+            $table->foreign('product_id')
+                  ->references('product_id')
+                  ->on('products')
+                  ->onDelete('cascade');
+            
+            $table->comment('订单商品明细表');
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('order_items');
     }
