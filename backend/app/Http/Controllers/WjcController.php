@@ -1,20 +1,22 @@
+<?php
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInspectionRequest;
+use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
-use App\Http\Requests\StoreInspectionRequest;
 use App\Models\Order;
 use App\Models\Inspection;
 use Illuminate\Http\Request;
 
 class WjcController extends Controller
+
 {
     //订单模拟方法
 
     //消费者创建订单
 
-    public function storeOrder(StoreOrderRequest $request)
+    public function storeOrder(Request $request)
     {
         $user = $request->user();
         $data = $request->validated();
