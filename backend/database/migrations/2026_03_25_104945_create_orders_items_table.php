@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->bigIncrements('order_item_id')->comment('订单项ID');
-            $table->bigInteger('order_id')->comment('所属订单ID');
-            $table->bigInteger('product_id')->comment('商品ID');
+            $table->unsignedBigInteger('order_id')->comment('所属订单ID');
+            $table->unsignedBigInteger('product_id')->comment('商品ID');
             $table->integer('quantity')->comment('购买数量');
             $table->decimal('unit_price', 10, 2)->comment('下单时商品单价');
             

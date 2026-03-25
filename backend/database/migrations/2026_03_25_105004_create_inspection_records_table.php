@@ -19,7 +19,7 @@ return new class extends Migration
 
             // 外键约束
             $table->foreign('order_id')
-                  ->references('order_id')
+                  ->references('id')
                   ->on('orders')
                   ->onDelete('cascade');
             
