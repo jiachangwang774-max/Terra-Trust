@@ -5,26 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderItem extends Model
+class InspectionRecord extends Model
 {
     use HasFactory;
 
     // 表名
-    protected $table = 'order_items';
+    protected $table = 'inspection_records';
 
     // 主键
-    protected $primaryKey = 'order_item_id';
+    protected $primaryKey = 'inspection_id';
 
     // 可批量赋值字段
     protected $fillable = [
         'order_id',
-        'product_id',
-        'quantity',
-        'unit_price',
+        'purchaser_id',
+        'result',
+        'inspection_time',
+        'remarks',
     ];
 
-    // 关闭自动维护时间戳（表中无 created_at / updated_at）
-    public $timestamps = false;
+    // 关闭自动更新 updated_at
+    const UPDATED_AT = null;
 
     /**
      * 所属订单
@@ -35,10 +36,10 @@ class OrderItem extends Model
     }
 
     /**
-     * 所属商品
+     * 执行抽检的采购商
      */
-    public function product()
+    public function purchaser()
     {
-        return $this->belongsTo(Products::class, 'product_id', 'product_id');
+        return $this->belongsTo(User::class, 'purchaser_id', 'user_id');
     }
 }
