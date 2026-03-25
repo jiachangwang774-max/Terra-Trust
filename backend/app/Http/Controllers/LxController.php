@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class LxController extends \Illuminate\Routing\Controller
 {
@@ -29,7 +30,7 @@ class LxController extends \Illuminate\Routing\Controller
 
         $user = User::create($validated);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'code' => 200,
@@ -37,6 +38,8 @@ class LxController extends \Illuminate\Routing\Controller
             'data' => [
                 'user' => $user,
                 'token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => JWTAuth::factory()->getTTL() * 60,
             ],
         ]);
     }
@@ -51,15 +54,26 @@ class LxController extends \Illuminate\Routing\Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('username', $validated['username'])->first();
+        $credentials = [
+            'username' => $validated['username'],
+            'password' => $validated['password'],
+        ];
 
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'username' => ['用户名或密码错误'],
-            ]);
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json([
+                    'code' => 401,
+                    'message' => '用户名或密码错误',
+                ], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json([
+                'code' => 500,
+                'message' => '无法创建令牌',
+            ], 500);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $user = JWTAuth::user();
 
         return response()->json([
             'code' => 200,
@@ -67,6 +81,8 @@ class LxController extends \Illuminate\Routing\Controller
             'data' => [
                 'user' => $user,
                 'token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => JWTAuth::factory()->getTTL() * 60,
             ],
         ]);
     }
@@ -81,8 +97,7 @@ class LxController extends \Illuminate\Routing\Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        /** @var User $user */
-        $user = Auth::user();
+        $user = JWTAuth::parseToken()->authenticate();
 
         if (!Hash::check($validated['old_password'], $user->password)) {
             return response()->json([
@@ -106,8 +121,7 @@ class LxController extends \Illuminate\Routing\Controller
      */
     public function profile(Request $request)
     {
-        /** @var User $user */
-        $user = Auth::user();
+        $user = JWTAuth::parseToken()->authenticate();
 
         return response()->json([
             'code' => 200,
@@ -121,8 +135,7 @@ class LxController extends \Illuminate\Routing\Controller
      */
     public function updateProfile(Request $request)
     {
-        /** @var User $user */
-        $user = Auth::user();
+        $user = JWTAuth::parseToken()->authenticate();
 
         $validated = $request->validate([
             'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,

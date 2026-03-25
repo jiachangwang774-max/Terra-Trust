@@ -8,7 +8,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // 需要认证的接口
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     // 用户接口
     Route::post('/reset-password', [LxController::class, 'resetPassword']);
     Route::get('/profile', [LxController::class, 'profile']);
