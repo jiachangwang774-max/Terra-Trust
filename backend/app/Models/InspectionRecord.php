@@ -14,6 +14,12 @@ class InspectionRecord extends Model
 
     // 主键
     protected $primaryKey = 'inspection_id';
+    
+    // 允许通过 id 访问主键
+    public function getIdAttribute()
+    {
+        return $this->inspection_id;
+    }
 
     // 可批量赋值字段
     protected $fillable = [

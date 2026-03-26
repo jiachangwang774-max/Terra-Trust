@@ -536,6 +536,7 @@ class ComposerStaticInitc57754c93ae34ac3b9b716a0fd2f2149
 
     public static $classMap = array (
         'App\\Http\\Controllers\\LxController' => __DIR__ . '/../..' . '/app/Http/Controllers/LxController.php',
+        'App\\Http\\Controllers\\WjcController' => __DIR__ . '/../..' . '/app/Http/Controllers/WjcController.php',
         'App\\Models\\InspectionRecord' => __DIR__ . '/../..' . '/app/Models/InspectionRecord.php',
         'App\\Models\\Order' => __DIR__ . '/../..' . '/app/Models/Order.php',
         'App\\Models\\OrderItem' => __DIR__ . '/../..' . '/app/Models/OrderItem.php',

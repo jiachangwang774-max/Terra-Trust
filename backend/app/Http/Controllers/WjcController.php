@@ -1,25 +1,28 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreInspectionRequest;
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderStatusRequest;
-use App\Models\Order;
-use App\Models\Inspection;
 use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\InspectionRecord;
 
-class WjcController extends Controller
-
+class WjcController extends \Illuminate\Routing\Controller
 {
-    //订单模拟方法
+    //订单模块
 
     //消费者创建订单
 
     public function storeOrder(Request $request)
     {
+        $validated = $request->validate([
+            'shipping_address' => 'required|string',
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
         $user = $request->user();
-        $data = $request->validated();
+        $data = $validated;
 
         $totalAmount = collect($data['items'])->sum(function($item){
             return $item['quantity'] * 5.99;
@@ -29,23 +32,23 @@ class WjcController extends Controller
             'consumer_id' => $user->id,
             'total_amount' => $totalAmount,
             'shipping_address' => $data['shipping_address'],
-            'status' =>'pending',
+            'status' => 'pending',    
         ]);
 
         foreach($data['items'] as $item){
             $order->items()->create([
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'unit_price' => 5.99,
+                'unit_price' => 5.99,    
             ]);
         }
 
         return response()->json([
             'code' => 200,
-            'msg' => '订单创建成功',
+            'message' => '订单创建成功',
             'data' => [
-                'order_id' => $order->id,
-                'total_amount' => $totalAmount,   
+                'order_id' => $order->id,   
+                'total_amount' => $totalAmount,
             ],
         ]);
     }
@@ -119,9 +122,9 @@ class WjcController extends Controller
 
     //采购商接单
 
-    public function acceptOrder(Order $order)
+    public function acceptOrder(Request $request, Order $order)
     {
-        $user = auth()->user();
+        $user = $request->user();
         if ($order->status !== 'pending') {
             return response()->json(['code' => 400, 'message' => '订单状态不允许接单'], 400);
         }
@@ -140,8 +143,12 @@ class WjcController extends Controller
 
     //订单状态更新
 
-    public function updateOrderStatus(UpdateOrderStatusRequest $request, Order $order)
+    public function updateOrderStatus(Request $request, Order $order)
     {
+        $validated = $request->validate([
+            'status' => 'required|string'
+        ]);
+
         $order->update(['status' => $request->status]);
 
         return response()->json([
@@ -169,7 +176,7 @@ class WjcController extends Controller
                 'items' => $order->items->map(function ($item) {
                     return [
                         'product_id' => $item->product_id,
-                        'product_name' => $item->product->name ?? '未知商品',
+                        'product_name' => '未知商品',
                         'quantity' => $item->quantity,
                         'unit_price' => $item->unit_price,
                     ];
@@ -180,14 +187,21 @@ class WjcController extends Controller
 
     // 抽检模块方法
 
-    //提交抽检结果（采购商）
+    //提交抽检结果
 
-    public function storeInspection(StoreInspectionRequest $request)
+    public function storeInspection(Request $request)
     {
-        $user = $request->user();
-        $data = $request->validated();
+        $validated = $request->validate([
+            'order_id' => 'required|integer',
+            'result' => 'required|string',
+            'inspection_time' => 'required|date',
+            'remarks' => 'nullable|string',
+        ]);
 
-        $inspection = Inspection::create([
+        $user = $request->user();
+        $data = $validated;
+
+        $inspection = InspectionRecord::create([
             'order_id' => $data['order_id'],
             'purchaser_id' => $user->id,
             'result' => $data['result'],
@@ -207,7 +221,7 @@ class WjcController extends Controller
     public function purchaserInspectionList(Request $request)
     {
         $user = $request->user();
-        $inspections = Inspection::where('purchaser_id', $user->id)->paginate(
+        $inspections = InspectionRecord::where('purchaser_id', $user->id)->paginate(
             $request->input('size', 10),
             ['*'],
             'page',
@@ -234,11 +248,11 @@ class WjcController extends Controller
         ]);
     }
 
-     //根据订单查询抽检结果
+    //根据订单查询抽检结果
 
     public function showInspectionByOrder(Order $order)
     {
-        $inspection = $order->inspection;
+        $inspection = InspectionRecord::where('order_id', $order->id)->first();
 
         if (!$inspection) {
             return response()->json(['code' => 404, 'message' => '该订单暂无抽检记录'], 404);
@@ -258,3 +272,5 @@ class WjcController extends Controller
         ]);
     }
 }
+
+?>
