@@ -17,6 +17,14 @@ Route::prefix('v1')->group(function () {
     // 订单公开接口
     Route::post('/orders', [WjcController::class, 'storeOrder']);
     Route::get('/purchaser/orders/pending', [WjcController::class, 'purchaserPendingOrders']);
+    Route::put('/purchaser/orders/{order}/accept', [WjcController::class, 'acceptOrder']);
+    Route::put('/orders/{order}/status', [WjcController::class, 'updateOrderStatus']);
+    Route::get('/orders/{order}', [WjcController::class, 'showOrder']);
+    
+    // 抽检公开接口
+    Route::post('/inspections', [WjcController::class, 'storeInspection']);//创建抽检
+    Route::get('/purchaser/inspections', [WjcController::class, 'purchaserInspectionList']);//采购抽检抽检列表
+    Route::get('/orders/{order}/inspection', [WjcController::class, 'showInspectionByOrder']);//订单抽检详情
 });
 
 // 需要认证的接口
@@ -34,12 +42,4 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     Route::put('/products/{id}/stock', [LxController::class, 'updateStock']); // 修改商品库存
     // 订单接口
     Route::get('/consumer/orders', [WjcController::class, 'consumerOrderList']);
-    Route::put('/purchaser/orders/{order}/accept', [WjcController::class, 'acceptOrder']);
-    Route::put('/orders/{order}/status', [WjcController::class, 'updateOrderStatus']);
-    Route::get('/orders/{order}', [WjcController::class, 'showOrder']);
-
-    // 抽检接口
-    Route::post('/inspections', [WjcController::class, 'storeInspection']);//创建抽检
-    Route::get('/purchaser/inspections', [WjcController::class, 'purchaserInspectionList']);//采购抽检抽检列表
-    Route::get('/orders/{order}/inspection', [WjcController::class, 'showInspectionByOrder']);//订单抽检详情
 });
