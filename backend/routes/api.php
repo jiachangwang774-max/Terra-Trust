@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 // 公开接口（不需要认证）
 Route::prefix('v1')->group(function () {
-    // ==================== 用户管理模块 ====================
     Route::post('/register', [LxController::class, 'register']);//用户注册
     Route::post('/login', [LxController::class, 'login']);//用户登录
 
