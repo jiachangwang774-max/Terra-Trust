@@ -83,28 +83,48 @@ class WjcController extends \Illuminate\Routing\Controller
 
     public function purchaserPendingOrders(Request $request)
     {
-        $orders = Order::where('status', 'pending')->paginate(
-            $request->input('size', 10),
-            ['*'],
-            'page',
-            $request->input('page', 1)
-        );
+        // 模拟待接单订单数据
+        $orders = [
+            [
+                'id' => 1,
+                'total_amount' => 199.99,
+                'status' => 'pending',
+                'created_at' => now(),
+            ],
+            [
+                'id' => 2,
+                'total_amount' => 299.99,
+                'status' => 'pending',
+                'created_at' => now()->subHour(),
+            ],
+            [
+                'id' => 3,
+                'total_amount' => 399.99,
+                'status' => 'pending',
+                'created_at' => now()->subDay(),
+            ],
+        ];
+
+        // 模拟分页
+        $size = $request->input('size', 10);
+        $page = $request->input('page', 1);
+        $total = count($orders);
 
         return response()->json([
             'code' => 200,
             'message' => '获取成功',
             'data' => [
-                'total' => $orders->total(),
-                'page' => $orders->currentPage(),
-                'size' => $orders->perPage(),
-                'list' => $orders->map(function ($order) {
+                'total' => $total,
+                'page' => $page,
+                'size' => $size,
+                'list' => array_map(function ($order) {
                     return [
-                        'order_id' => $order->id,
-                        'total_amount' => $order->total_amount,
-                        'status' => $order->status,
-                        'created_at' => $order->created_at->toDateTimeString(),
+                        'order_id' => $order['id'],
+                        'total_amount' => $order['total_amount'],
+                        'status' => $order['status'],
+                        'created_at' => $order['created_at']->toDateTimeString(),
                     ];
-                }),
+                }, $orders),
             ],
         ]);
     }
