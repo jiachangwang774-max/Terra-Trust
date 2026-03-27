@@ -20,11 +20,11 @@ class LxController extends \Illuminate\Routing\Controller
         $validated = $request->validate([
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'phone' => 'nullable|string|max:20|unique:users',
-            'email' => 'nullable|email|max:255|unique:users',
+            'phone' => 'required|string|max:20|unique:users',
+            'email' => 'required|email|max:255|unique:users',
             'role' => 'required|string|in:consumer,supplier,purchaser',
             'real_name' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
+            'address' => 'required|string',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
