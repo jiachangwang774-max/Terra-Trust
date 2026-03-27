@@ -4,6 +4,7 @@ use App\Http\Controllers\LxController;
 use App\Http\Controllers\WjcController;
 use Illuminate\Support\Facades\Route;
 
+
 // 公开接口（不需要认证）
 Route::prefix('v1')->group(function () {
     Route::post('/register', [LxController::class, 'register']);//用户注册
