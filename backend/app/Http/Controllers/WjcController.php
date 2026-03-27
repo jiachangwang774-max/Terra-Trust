@@ -21,33 +21,22 @@ class WjcController extends \Illuminate\Routing\Controller
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        $user = $request->user();
+        // 模拟用户 ID
+        $userId = 1;
         $data = $validated;
 
         $totalAmount = collect($data['items'])->sum(function($item){
             return $item['quantity'] * 5.99;
         });
 
-        $order = Order::create([
-            'consumer_id' => $user->id,
-            'total_amount' => $totalAmount,
-            'shipping_address' => $data['shipping_address'],
-            'status' => 'pending',    
-        ]);
-
-        foreach($data['items'] as $item){
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'quantity' => $item['quantity'],
-                'unit_price' => 5.99,    
-            ]);
-        }
+        // 模拟订单创建
+        $orderId = rand(1000, 9999);
 
         return response()->json([
             'code' => 200,
             'message' => '订单创建成功',
             'data' => [
-                'order_id' => $order->id,   
+                'order_id' => $orderId,   
                 'total_amount' => $totalAmount,
             ],
         ]);

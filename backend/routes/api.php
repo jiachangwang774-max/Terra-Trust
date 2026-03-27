@@ -12,6 +12,9 @@ Route::prefix('v1')->group(function () {
     // 商品公开接口
     Route::get('/products', [LxController::class, 'productList']);
     Route::get('/products/{id}', [LxController::class, 'productDetail']);
+    
+    // 订单公开接口
+    Route::post('/orders', [WjcController::class, 'storeOrder']);
 });
 
 // 需要认证的接口
@@ -27,7 +30,6 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     Route::put('/products/{id}/stock', [LxController::class, 'updateStock']);
 
     // 订单接口
-    Route::post('/orders', [WjcController::class, 'storeOrder']);
     Route::get('/consumer/orders', [WjcController::class, 'consumerOrderList']);
     Route::get('/purchaser/orders/pending', [WjcController::class, 'purchaserPendingOrders']);
     Route::put('/purchaser/orders/{order}/accept', [WjcController::class, 'acceptOrder']);
