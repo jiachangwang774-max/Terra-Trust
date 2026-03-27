@@ -131,18 +131,9 @@ class WjcController extends \Illuminate\Routing\Controller
 
     //采购商接单
 
-    public function acceptOrder(Request $request, Order $order)
+    public function acceptOrder(Request $request, $orderId)
     {
-        $user = $request->user();
-        if ($order->status !== 'pending') {
-            return response()->json(['code' => 400, 'message' => '订单状态不允许接单'], 400);
-        }
-
-        $order->update([
-            'purchaser_id' => $user->id,
-            'status' => 'accepted',
-        ]);
-
+        // 模拟接单操作
         return response()->json([
             'code' => 200,
             'message' => '接单成功',
@@ -152,14 +143,13 @@ class WjcController extends \Illuminate\Routing\Controller
 
     //订单状态更新
 
-    public function updateOrderStatus(Request $request, Order $order)
+    public function updateOrderStatus(Request $request, $orderId)
     {
         $validated = $request->validate([
             'status' => 'required|string'
         ]);
 
-        $order->update(['status' => $request->status]);
-
+        // 模拟状态更新
         return response()->json([
             'code' => 200,
             'message' => '订单状态更新成功',
@@ -169,27 +159,45 @@ class WjcController extends \Illuminate\Routing\Controller
 
     //查询订单详情
 
-    public function showOrder(Order $order)
+    public function showOrder($orderId)
     {
+        // 模拟订单详情数据
+        $order = [
+            'id' => $orderId,
+            'consumer_id' => 1,
+            'purchaser_id' => 2,
+            'total_amount' => 199.99,
+            'status' => 'accepted',
+            'shipping_address' => '四川省成都市xxx区xxx路',
+            'created_at' => now(),
+            'items' => [
+                [
+                    'product_id' => 1,
+                    'product_name' => '商品1',
+                    'quantity' => 2,
+                    'unit_price' => 50.00,
+                ],
+                [
+                    'product_id' => 2,
+                    'product_name' => '商品2',
+                    'quantity' => 1,
+                    'unit_price' => 99.99,
+                ],
+            ],
+        ];
+
         return response()->json([
             'code' => 200,
             'message' => '获取成功',
             'data' => [
-                'order_id' => $order->id,
-                'consumer_id' => $order->consumer_id,
-                'purchaser_id' => $order->purchaser_id,
-                'total_amount' => $order->total_amount,
-                'status' => $order->status,
-                'shipping_address' => $order->shipping_address,
-                'created_at' => $order->created_at->toDateTimeString(),
-                'items' => $order->items->map(function ($item) {
-                    return [
-                        'product_id' => $item->product_id,
-                        'product_name' => '未知商品',
-                        'quantity' => $item->quantity,
-                        'unit_price' => $item->unit_price,
-                    ];
-                }),
+                'order_id' => $order['id'],
+                'consumer_id' => $order['consumer_id'],
+                'purchaser_id' => $order['purchaser_id'],
+                'total_amount' => $order['total_amount'],
+                'status' => $order['status'],
+                'shipping_address' => $order['shipping_address'],
+                'created_at' => $order['created_at']->toDateTimeString(),
+                'items' => $order['items'],
             ],
         ]);
     }
@@ -207,21 +215,13 @@ class WjcController extends \Illuminate\Routing\Controller
             'remarks' => 'nullable|string',
         ]);
 
-        $user = $request->user();
-        $data = $validated;
-
-        $inspection = InspectionRecord::create([
-            'order_id' => $data['order_id'],
-            'purchaser_id' => $user->id,
-            'result' => $data['result'],
-            'inspection_time' => $data['inspection_time'],
-            'remarks' => $data['remarks'],
-        ]);
+        // 模拟抽检记录创建
+        $inspectionId = rand(1000, 9999);
 
         return response()->json([
             'code' => 200,
             'message' => '抽检结果提交成功',
-            'data' => ['inspection_id' => $inspection->id],
+            'data' => ['inspection_id' => $inspectionId],
         ]);
     }
 
@@ -229,54 +229,73 @@ class WjcController extends \Illuminate\Routing\Controller
 
     public function purchaserInspectionList(Request $request)
     {
-        $user = $request->user();
-        $inspections = InspectionRecord::where('purchaser_id', $user->id)->paginate(
-            $request->input('size', 10),
-            ['*'],
-            'page',
-            $request->input('page', 1)
-        );
+        // 模拟抽检记录数据
+        $inspections = [
+            [
+                'id' => 1,
+                'order_id' => 1,
+                'result' => 'qualified',
+                'inspection_time' => now(),
+                'remarks' => '抽检合格',
+            ],
+            [
+                'id' => 2,
+                'order_id' => 2,
+                'result' => 'unqualified',
+                'inspection_time' => now()->subDay(),
+                'remarks' => '抽检不合格',
+            ],
+        ];
+
+        // 模拟分页
+        $size = $request->input('size', 10);
+        $page = $request->input('page', 1);
+        $total = count($inspections);
 
         return response()->json([
             'code' => 200,
             'message' => '获取成功',
             'data' => [
-                'total' => $inspections->total(),
-                'page' => $inspections->currentPage(),
-                'size' => $inspections->perPage(),
-                'list' => $inspections->map(function ($inspection) {
+                'total' => $total,
+                'page' => $page,
+                'size' => $size,
+                'list' => array_map(function ($inspection) {
                     return [
-                        'inspection_id' => $inspection->id,
-                        'order_id' => $inspection->order_id,
-                        'result' => $inspection->result,
-                        'inspection_time' => $inspection->inspection_time,
-                        'remarks' => $inspection->remarks,
+                        'inspection_id' => $inspection['id'],
+                        'order_id' => $inspection['order_id'],
+                        'result' => $inspection['result'],
+                        'inspection_time' => $inspection['inspection_time']->toDateTimeString(),
+                        'remarks' => $inspection['remarks'],
                     ];
-                }),
+                }, $inspections),
             ],
         ]);
     }
 
-    //根据订单查询抽检结果
+    //查询订单的抽检记录
 
-    public function showInspectionByOrder(Order $order)
+    public function showInspectionByOrder($orderId)
     {
-        $inspection = InspectionRecord::where('order_id', $order->id)->first();
-
-        if (!$inspection) {
-            return response()->json(['code' => 404, 'message' => '该订单暂无抽检记录'], 404);
-        }
+        // 模拟订单抽检记录
+        $inspection = [
+            'id' => 1,
+            'order_id' => $orderId,
+            'purchaser_id' => 2,
+            'result' => 'qualified',
+            'inspection_time' => now(),
+            'remarks' => '抽检合格',
+        ];
 
         return response()->json([
             'code' => 200,
             'message' => '获取成功',
             'data' => [
-                'inspection_id' => $inspection->id,
-                'order_id' => $inspection->order_id,
-                'purchaser_id' => $inspection->purchaser_id,
-                'result' => $inspection->result,
-                'inspection_time' => $inspection->inspection_time,
-                'remarks' => $inspection->remarks,
+                'inspection_id' => $inspection['id'],
+                'order_id' => $inspection['order_id'],
+                'purchaser_id' => $inspection['purchaser_id'],
+                'result' => $inspection['result'],
+                'inspection_time' => $inspection['inspection_time']->toDateTimeString(),
+                'remarks' => $inspection['remarks'],
             ],
         ]);
     }
