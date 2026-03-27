@@ -31,17 +31,10 @@ class LxController extends \Illuminate\Routing\Controller
 
         $user = User::create($validated);
 
-        $token = JWTAuth::fromUser($user);
-
         return response()->json([
             'code' => 200,
             'message' => '注册成功',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => JWTAuth::factory()->getTTL() * 60,
-            ],
+            'data' => $user,
         ]);
     }
 
