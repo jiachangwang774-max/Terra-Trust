@@ -138,12 +138,17 @@ class LxController extends \Illuminate\Routing\Controller
             'address' => 'nullable|string',
         ]);
 
-        $user->update($validated);
+        // 过滤掉 null 值，只保留实际要修改的字段
+        $updateData = array_filter($validated, function ($value) {
+            return $value !== null;
+        });
+
+        $user->update($updateData);
 
         return response()->json([
             'code' => 200,
             'message' => '修改成功',
-            'data' => $user,
+            'data' => $updateData,
         ]);
     }
 
