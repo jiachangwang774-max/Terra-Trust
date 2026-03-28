@@ -29,13 +29,10 @@ Route::prefix('v1')->group(function () {
 // 需要认证的接口
 Route::prefix('v1')->middleware('jwt.auth')->group(function () {
 
-
-      // ==================== 用户管理模块 ====================
     Route::post('/reset-password', [LxController::class, 'resetPassword']); // 重置密码
     Route::get('/profile', [LxController::class, 'profile']);               // 获取个人信息
     Route::put('/profile', [LxController::class, 'updateProfile']);         // 修改个人信息
     
-    // ==================== 商品管理模块（供应商） ====================
     Route::post('/products', [LxController::class, 'storeProduct']);        // 发布商品
     Route::put('/products/{id}', [LxController::class, 'updateProduct']);   // 修改商品信息
     Route::put('/products/{id}/stock', [LxController::class, 'updateStock']); // 修改商品库存
