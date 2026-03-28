@@ -37,6 +37,7 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     Route::post('/products', [LxController::class, 'storeProduct']);        // 发布商品
     Route::put('/products/{id}', [LxController::class, 'updateProduct']);   // 修改商品信息
     Route::put('/products/{id}/stock', [LxController::class, 'updateStock']); // 修改商品库存
+    Route::delete('/products/{id}', [LxController::class, 'deleteProduct']); // 删除商品
     // 订单接口
     Route::get('/consumer/orders', [WjcController::class, 'consumerOrderList']);
 });

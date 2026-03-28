@@ -135,20 +135,29 @@ class LxController extends \Illuminate\Routing\Controller
             'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,
             'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
             'real_name' => 'nullable|string|max:255',
+             'username' => 'nullable|string|max:255',
             'address' => 'nullable|string',
         ]);
 
         // 过滤掉 null 值，只保留实际要修改的字段
         $updateData = array_filter($validated, function ($value) {
-            return $value !== null;
+            return $value !== null && $value !== '';
         });
+
+        if (empty($updateData)) {
+            return response()->json([
+                'code' => 400,
+                'message' => '请提供要修改的字段',
+            ], 400);
+        }
 
         $user->update($updateData);
 
+        // 返回修改后的用户信息
         return response()->json([
             'code' => 200,
             'message' => '修改成功',
-            'data' => $updateData,
+            'data' => $user->fresh(),
         ]);
     }
 
@@ -206,6 +215,18 @@ class LxController extends \Illuminate\Routing\Controller
             'unit' => 'required|string|max:50',
             'category' => 'nullable|string|max:100',
         ]);
+
+        // 检查该供应商是否已发布过同名商品
+        $existingProduct = Product::where('supplier_id', $user->id)
+            ->where('product_name', $validated['product_name'])
+            ->first();
+
+        if ($existingProduct) {
+            return response()->json([
+                'code' => 400,
+                'message' => '您已发布过同名商品，请勿重复发布',
+            ], 400);
+        }
 
         $validated['supplier_id'] = $user->id;
 
@@ -295,6 +316,39 @@ class LxController extends \Illuminate\Routing\Controller
             'code' => 200,
             'message' => '库存修改成功',
             'data' => $product,
+        ]);
+    }
+
+    /**
+     * 删除商品（供应商）
+     */
+    public function deleteProduct($id)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->role !== 'supplier') {
+            return response()->json([
+                'code' => 403,
+                'message' => '只有供应商可以删除商品',
+            ], 403);
+        }
+
+        $product = Product::where('id', $id)
+            ->where('supplier_id', $user->id)
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'code' => 404,
+                'message' => '商品不存在或无权限删除',
+            ], 404);
+        }
+
+        $product->delete();
+
+        return response()->json([
+            'code' => 200,
+            'message' => '商品删除成功',
         ]);
     }
 
