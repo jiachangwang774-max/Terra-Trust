@@ -32,6 +32,7 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function () {
     Route::post('/reset-password', [LxController::class, 'resetPassword']); // 重置密码
     Route::get('/profile', [LxController::class, 'profile']);               // 获取个人信息
     Route::put('/profile', [LxController::class, 'updateProfile']);         // 修改个人信息
+    Route::delete('/account', [LxController::class, 'deleteAccount']);      // 注销账号
     
     Route::post('/products', [LxController::class, 'storeProduct']);        // 发布商品
     Route::put('/products/{id}', [LxController::class, 'updateProduct']);   // 修改商品信息

@@ -148,6 +148,37 @@ class LxController extends \Illuminate\Routing\Controller
     }
 
     /**
+     * 注销账号
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $validated = $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        // 验证密码
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'code' => 400,
+                'message' => '密码错误',
+            ], 400);
+        }
+
+        // 删除用户
+        $user->delete();
+
+        // 使当前 token 失效
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+        return response()->json([
+            'code' => 200,
+            'message' => '账号注销成功',
+        ]);
+    }
+
+    /**
      * 发布商品（供应商）
      */
     public function storeProduct(Request $request)
