@@ -1,10 +1,6 @@
 <?php
 
 return [
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     /*
     |--------------------------------------------------------------------------
     | Cross-Origin Resource Sharing (CORS) Configuration
@@ -32,10 +28,6 @@ return [
 
     'max_age' => 0,
 
-<<<<<<< Updated upstream
     'supports_credentials' => true,
 
-=======
-    'supports_credentials' => false,
->>>>>>> Stashed changes
 ];
