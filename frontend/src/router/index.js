@@ -74,6 +74,11 @@ const router = createRouter({
       path:'/personalCenter',
       name:'personalCenter',
       component: () => import('../views/User/personalCenter.vue')
+    },
+    {
+      path:'/settle',
+      name:'settle',
+      component: () => import('../views/settle.vue')
     }
   ],
 })

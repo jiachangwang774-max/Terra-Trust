@@ -7,6 +7,4 @@ import router from '@/router';
          <fheadBox/>
          <router-view/>
     </div>
-    
-   
 </template>
