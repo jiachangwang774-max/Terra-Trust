@@ -1,27 +1,82 @@
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import theBtn from '@/components/common/theBtn.vue';
 import reBtn from '@/components/common/reBtn.vue';
+import { registerApi } from '@/api/index'
+
+const router = useRouter()
+const form = ref({
+  username: '',
+  password: '',
+  password_confirmation: '',
+  phone: '',
+  email: '',
+  role: 'consumer',
+  real_name: '',
+  address: ''
+})
+
+const handleRegister = async (event) => {
+  event.preventDefault()
+  if (form.value.password !== form.value.password_confirmation) {
+    alert('两次输入的密码不一致')
+    return
+  }
+  
+  try {
+    const response = await registerApi(form.value)
+    if (response.code === 200) {
+      alert('注册成功，请登录')
+      router.push('/')
+    } else {
+      alert(response.message)
+    }
+  } catch (error) {
+    alert('注册失败，请检查网络连接')
+  }
+}
+
 </script>
 <template>
  <div class="bigContainer">
     <div class="bigBox">
         <div class="formBox1">
-            <form action="#">
+            <form @submit="handleRegister">
                 <h1>Register</h1>
                 <div class="input-box1">
-                    <input type="text" placeholder="用户名" required>
+                    <input type="text" v-model="form.username" placeholder="用户名" required>
                 </div>
                 <div class="input-box1">
-                    <input type="Password" placeholder="密码" required>
+                    <input type="Password" v-model="form.password" placeholder="密码" required>
                 </div>
                 <div class="input-box1">
-                    <input type="tel" placeholder="电话" required>
+                    <input type="Password" v-model="form.password_confirmation" placeholder="确认密码" required>
+                </div>
+                <div class="input-box1">
+                    <input type="tel" v-model="form.phone" placeholder="电话" required>
+                </div>
+                <div class="input-box1">
+                    <input type="email" v-model="form.email" placeholder="邮箱" required>
+                </div>
+                <div class="input-box1">
+                    <select v-model="form.role" required>
+                        <option value="consumer">消费者</option>
+                        <option value="supplier">供应商</option>
+                        <option value="purchaser">采购商</option>
+                    </select>
+                </div>
+                <div class="input-box1">
+                    <input type="text" v-model="form.real_name" placeholder="真实姓名">
+                </div>
+                <div class="input-box1">
+                    <input type="text" v-model="form.address" placeholder="地址" required>
                 </div>
                 <div class="input-box2">
                     <input type="text" placeholder="请输入验证码" required>
-                    <button class="codeBtn">点此获得验证码</button>
+                    <button type="button" class="codeBtn">点此获得验证码</button>
                 </div>
-                <theBtn to="/register"class="the-btn"></theBtn>
+                <theBtn type="submit" class="the-btn">注册</theBtn>
             </form>
         </div>
 
@@ -31,7 +86,7 @@ import reBtn from '@/components/common/reBtn.vue';
                  <h1>你好，欢迎回来!</h1>
                  <span>已经注册好了?点击下方按钮登录吧</span>
             </div>
-            <reBtn to="/"class="re-btn"></reBtn>
+            <reBtn to="/" class="re-btn">登录</reBtn>
         </div>
      
     </div>

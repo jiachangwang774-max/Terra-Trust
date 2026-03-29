@@ -75,7 +75,7 @@ const router = createRouter({
       name:'personalCenter',
       component: () => import('../views/User/personalCenter.vue')
     }
-  ],
+  ]
 })
 
 export default router

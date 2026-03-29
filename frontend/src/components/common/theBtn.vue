@@ -17,8 +17,9 @@ const handleClick = () =>{
 </script>
 
 <template>
-    <button class="the-btn" @click="handleClick">注册</button>
-    <slot></slot>
+    <button class="the-btn" @click="handleClick">
+        <slot></slot>
+    </button>
 </template>
 
 <style scoped>

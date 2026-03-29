@@ -1,25 +1,51 @@
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import theBtn from '@/components/common/theBtn.vue';
 import reBtn from '@/components/common/reBtn.vue';
+import { loginApi } from '@/api/index'
+
+const router = useRouter()
+const form = ref({
+  username: '',
+  password: ''
+})
+
+const handleLogin = async (event) => {
+  event.preventDefault()
+  try {
+    const response = await loginApi(form.value)
+    if (response.code === 200) {
+      // 保存token
+      localStorage.setItem('token', response.data.token)
+      // 跳转到首页
+      router.push('/firstPage')
+    } else {
+      alert(response.message)
+    }
+  } catch (error) {
+    alert('登录失败，请检查网络连接')
+  }
+}
 
 </script>
 <template>
 <div class="background">
 <div class="container">
  <div class="formBox">
-     <form action="#">
+     <form @submit="handleLogin">
          <h1>登录</h1>
          <div class="input-box">
-             <input type="text" placeholder="用户名" required>
+             <input type="text" v-model="form.username" placeholder="用户名" required>
          </div>
          <div class="input-box">
-             <input type="password" placeholder="密码" required>
+             <input type="password" v-model="form.password" placeholder="密码" required>
          </div>
          <div class="littleBox">
              <span>忘记密码？</span>
-             <router-link to="/Forget-Password">点此找回→</router-link>
+             <router-link to="/forget-password">点此找回→</router-link>
          </div>
-         <reBtn to="/firstPage"class="re-btn btn-left" ></reBtn> 
+         <reBtn type="submit" class="re-btn btn-left" >登录</reBtn> 
      </form>
  </div>
     <div class="right">
@@ -28,7 +54,7 @@ import reBtn from '@/components/common/reBtn.vue';
              <h1>你好，欢迎加入我们!</h1>
              <span>还没有账户?赶紧点击下方按钮注册一个吧！</span>
          </div>
-         <theBtn to="/register" class="the-btn btn-right"></theBtn>
+         <theBtn to="/register" class="the-btn btn-right">注册</theBtn>
     </div>
 </div>
 </div>
