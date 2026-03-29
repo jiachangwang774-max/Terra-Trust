@@ -6,16 +6,21 @@ import images1 from '@/assets/image/image 1.svg';
 import images2 from '@/assets/image/image2.svg';
 import images3 from '@/assets/image/image3.svg';
 import headBox from '@/components/common/headBox/head.vue';
+
 </script>
 <template>
-<div class="bigContainer">
-  <div class="head-box">
-    <headBox/>
-  </div>
+  <!--  如果是子页面，就只显示子页面 -->
+  <router-view v-if="$route.path.includes('fmainPage')" />
 
-  <div class="banner-box">
-       <lunboTu/>
-  </div>
+  <!--  否则显示首页 -->
+  <div v-else class="bigContainer">
+    <div class="head-box">
+      <headBox/>
+    </div>
+
+    <div class="banner-box">
+      <lunboTu/>
+    </div>
 
  <div class="bigBox">
         <div class="image-box1">
@@ -57,7 +62,8 @@ import headBox from '@/components/common/headBox/head.vue';
          <div class="chaBox">
              <h2>消费者</h2>
              <span>源头可查，购买放心。推荐可靠，体验安心</span>
-             <entrance to="/register"class="ent-btn"></entrance>
+
+             <entrance to="/firstPage/fmainPage"class="ent-btn"></entrance>
          </div>
      </div>
  </div>

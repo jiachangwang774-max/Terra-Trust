@@ -11,7 +11,21 @@ const router = createRouter({
     {
       path:'/firstPage',
       name:'firstPage',
-      component:() => import('../views/Home/firstPage.vue')
+      component:() => import('../views/Home/firstPage.vue'),
+      children:[{
+        path:'fmainPage',
+        name:'fmainPage',
+        component:()=>import('../views/User/buyer/fmainPage.vue'),
+        children:[{
+           path:'fmyOrder',
+           name:'fmyOrder',
+           component:()=>import('../views/User/buyer/fmyOrder.vue'),
+      },{
+        path:'shopCar',
+        name:'shopCar',
+        component:()=>import('../views/User/buyer/shopCar.vue'),
+      }]
+      }]
     },
     {
       path:'/',
