@@ -2,6 +2,7 @@
 import personImg from './personImg.vue';
 import tanChuang from './tanChuang.vue';
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 // 父组件控制弹窗 组件通信形式之一
 // 起始状态的弹窗 不显示(布尔型控制是否显示)
 const tanStatus = ref(false)

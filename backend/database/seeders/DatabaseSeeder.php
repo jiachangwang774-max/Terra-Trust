@@ -19,5 +19,8 @@ class DatabaseSeeder extends Seeder
             'real_name' => '系统管理员',
             'address' => '系统默认',
         ]);
+
+        // 运行商品种子
+        $this->call(ProductSeeder::class);
     }
 }

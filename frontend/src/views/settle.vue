@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/common/Header.vue'
+import { createOrderApi } from '@/api/index'
 
 const router = useRouter()
 
@@ -10,15 +11,48 @@ const cartChecked = ref([
   { id: 3, name: '生态大米', shop: '农家小院', price: 68, num: 2 }
 ])
 
+const loading = ref(false)
+const error = ref('')
+
 const totalMoney = computed(() => {
   return cartChecked.value.reduce((sum, item) => sum + item.price * item.num, 0)
 })
 
-const payOk = () => {
-  // 提交订单逻辑
-  alert('订单提交成功！')
-  router.push('/myOrder')
+const payOk = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const orderData = {
+      items: cartChecked.value.map(item => ({
+        product_id: item.id,
+        quantity: item.num,
+        price: item.price
+      })),
+      total_amount: totalMoney.value,
+      status: 'pending'
+    }
+    
+    const response = await createOrderApi(orderData)
+    if (response.success) {
+      // 订单创建成功
+      alert('订单提交成功！')
+      router.push('/myOrder')
+    } else {
+      error.value = response.message || '订单创建失败'
+    }
+  } catch (err) {
+    error.value = '网络错误，请稍后重试'
+    console.error('Error creating order:', err)
+  } finally {
+    loading.value = false
+  }
 }
+
+// 从购物车页面传递数据
+onMounted(() => {
+  // 这里可以从路由参数或本地存储获取购物车数据
+  // 暂时使用模拟数据
+})
 </script>
 
 <template>
@@ -41,7 +75,7 @@ const payOk = () => {
         <div>
           <div class="text-sm">{{i.name}}</div>
           <div class="text-xs text-gray-500 mt-1">店铺：{{i.shop}}｜信誉★★★★★｜预计3-5天到货</div>
-          <div class="mt-1">¥{{i.price}}</div>
+          <div class="mt-1">¥{{i.price}} × {{i.num}}</div>
         </div>
       </div>
     </div>
@@ -52,7 +86,17 @@ const payOk = () => {
           <span>实付金额</span>
           <span class="text-[#593A3A] text-lg font-bold">¥{{totalMoney}}</span>
       </div>
-      <button class="w-full mt-4 bg-[#1F422C] text-white py-3 rounded-lg" @click="payOk">提交订单</button>
+      <div v-if="error" class="text-center py-3 text-red-500">
+        {{ error }}
+      </div>
+      <el-button 
+        class="w-full mt-4 bg-[#1F422C] text-white py-3 rounded-lg" 
+        @click="payOk"
+        :loading="loading"
+        :disabled="loading"
+      >
+        提交订单
+      </el-button>
     </div>
   </div>
 </template>

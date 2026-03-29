@@ -1,284 +1,116 @@
 <script setup>
-import { ref }  from 'vue'
-import coForm from '@/components/common/cooporation/coForm.vue';
-import OrderCard from '@/components/Order/orderCard.vue';
-import headBox from '@/components/common/headBox/head.vue';
-//function close(){} 
-const startData =ref('')
-const endData =ref('')
-const status =ref('')
-const select=ref('')
-const handleSearch=()=>{
-   startData.value=''
-   endData.value=''
-   status.value=''
-   select.value=''
+import { ref, computed, onMounted } from 'vue'
+import Header from '@/components/common/Header.vue'
+import { getOrderListApi } from '@/api/index'
+
+const orderType = ref('dfh')
+const orderList = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const orderStatusMap = {
+  'pending': '待发货',
+  'processing': '待收货',
+  'completed': '已完成订单',
+  'cancelled': '已取消订单'
 }
 
+const orderListFilter = computed(() => {
+  return orderList.value.filter(item => {
+    switch (orderType.value) {
+      case 'dfh':
+        return item.status === 'pending'
+      case 'dsh':
+        return item.status === 'processing'
+      case 'ywc':
+        return item.status === 'completed'
+      case 'yqx':
+        return item.status === 'cancelled'
+      default:
+        return true
+    }
+  })
+})
+
+const loadOrders = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const response = await getOrderListApi()
+    if (response.data) {
+      orderList.value = response.data.map(order => ({
+        id: order.id,
+        name: order.items?.[0]?.product_name || '商品',
+        price: order.total_amount,
+        type: order.status
+      }))
+    }
+  } catch (err) {
+    error.value = '获取订单数据失败'
+    console.error('Error loading orders:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化加载数据
+onMounted(() => {
+  loadOrders()
+})
 </script>
+
 <template>
-   <div class="head-box">
-     <headBox/>
-   </div>
-   <div class="bigContainer">
-     <div class="fiContainer">
-          <div class="orderAmount">
-             <h4>总订单数</h4>
-             <span class="orderNum">2,503</span>
-             <div class="compare">
-                 <span>较昨日</span>
-                 <span>+32</span>
-             </div>
-         </div>
-
-         <div class="toMask">
-             <h4>今日事务</h4>
-             <div class="tipBox">
-                 <span class="tips">异常订单</span>
-                 <span>点此查看详情</span> 
-             </div>
-             <div class="warnBox">
-                 <span class="plan">待处理订单</span>
-                 <span>点此处理</span>
-             </div>
-         </div>
-
-         <div class="allCommercial">
-             <h4>总销售额</h4>
-             <span class="orderNum">15,890.00</span>
-             <div class="compare">
-                 <span>较上一季度</span>
-                 <span>+20%</span>
-             </div>
-         </div>
-      </div>
-
-      <div class="sendOrder">
-          <h3>已交易订单</h3>
-          <div class="formBox">
-              <div class="timeBox">
-                  <label>交易时间</label>
-                  <div class="timeRange">
-                      <input type="date" v-model="startData"/> —— <input type="date" v-model="endData"/>
-                  </div>
-              </div>
-
-              <div class="oStatus">
-                  <label>订单状态</label>
-                  <select v-model="status">
-                     <option value="" disabled >请选择</option>
-                     <option value="已完成">已完成</option>
-                     <option value="已发货">已发货</option>
-                     <option value="抽检中">抽检中</option>
-                     <option value="已交付">已交付</option>
-                  </select>
-              </div>
-
-              <div class="row">
-                  <label>排序方式</label>
-                  <select v-model="select">
-                    <option value="" disabled>请选择</option>
-                    <option value="时间倒序">时间倒序</option>
-                    <option value="时间正序">时间正序</option>
-                  </select>
-              </div>
+  <Header />
+  <div class="container">
+    <div class="flex gap-3 mb-5 flex-wrap">
+      <button class="px-5 py-2 rounded-full transition" @click="orderType='dfh'" :class="orderType=='dfh'?'bg-[#448C5A] text-white':'bg-gray-200'">待发货</button>
+      <button class="px-5 py-2 rounded-full transition" @click="orderType='dsh'" :class="orderType=='dsh'?'bg-[#448C5A] text-white':'bg-gray-200'">待收货</button>
+      <button class="px-5 py-2 rounded-full transition" @click="orderType='ywc'" :class="orderType=='ywc'?'bg-[#448C5A] text-white':'bg-gray-200'">已完成订单</button>
+      <button class="px-5 py-2 rounded-full transition" @click="orderType='yqx'" :class="orderType=='yqx'?'bg-[#448C5A] text-white':'bg-gray-200'">已取消订单</button>
+    </div>
+    
+    <div v-if="loading" class="text-center py-10">
+      <el-loading :fullscreen="false" text="加载中..." />
+    </div>
+    <div v-else-if="error" class="text-center py-10 text-red-500">
+      {{ error }}
+      <el-button type="primary" size="small" @click="loadOrders" class="mt-2">重新加载</el-button>
+    </div>
+    <div v-else class="card scroll-wrap">
+      <div v-for="item in orderListFilter" class="flex items-center justify-between border-b border-gray-100 py-4">
+        <div class="flex items-center">
+          <div class="w-20 h-20 rounded-lg bg-[#593A3A] mr-4"></div>
+          <div>
+            <div class="text-sm font-medium">{{item.name}}</div>
+            <div class="text-red-500 mt-1">¥{{item.price}}</div>
           </div>
-          <div class="agBtn">
-             <button @click="handleSearch">重置筛选</button>
-          </div>
+        </div>
+        <div class="flex gap-2">
+          <button class="px-3 py-1 rounded text-sm text-white bg-[#593A3A]">申请退款</button>
+          <button v-if="item.type=='pending'" class="px-3 py-1 rounded text-sm text-white bg-[#448C5A]">修改地址</button>
+        </div>
       </div>
-      <!-- 之前订单 -->
-      <OrderCard/>
-      <!-- 历史记录表格 -->
-      <coForm/>  
- </div>
-
+      <div v-if="orderListFilter.length===0" class="text-center py-10 text-gray-400">暂无该类订单</div>
+    </div>
+  </div>
 </template>
+
 <style scoped>
-.bigContainer{
-    background: linear-gradient(90deg,#f6f2f2,#f4efe0);
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 50px;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
 }
-h4{
-    margin: 0;
-    color: #593A3A;
-    font-size: 1.3vw;
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
-.sendOrder{
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 30px;
-    padding: 50px;
-    gap: 30px;
+
+.scroll-wrap {
+  max-height: 600px;
+  overflow-y: auto;
 }
-.sendOrder h3{
-    margin: 0;
-}
-.fiContainer{
-    padding-top: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    gap: 20px;
-    padding: 20px;
-    margin-top: 60px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 30px;
-}
-.orderAmount{
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex: 0.33;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px 0;
-    gap: 10px;
-}
-.orderNum{
-    font-size: 2vw;
-    color: #4e6959;
-    font-weight: 500;
-}
-.compare{
-    display: flex;
-    flex-direction: row;
-    font-size: 1.4vw;
-}
-.compare span:nth-child(2){
-    color: #eb8f72;
-    font-weight: bold;
-}
-.toMask{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* justify-content: space-between; */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px 20px;
-    align-items: center;
-    flex: 0.33;
-}
-.tipBox{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    /* gap: 20px; */
-    width: 100%;
-    align-items: center;
-    padding: 0 10px;
-    border: 20px;
-    background-color: #e2a38f;
-}
-.tips{
-    color: #F1EAD2;
-    font-size: 1.3vw;
-    font-weight: 500;
-}
-.warnBox{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    /* justify-content作用的是主轴剩余空间。得强制子盒子的宽度才能用space-between */
-    /* gap: 20px; */
-    width: 100%;
-    align-items: center;
-    background-color: #b49b7b;
-    padding: 0 10px;
-}
-.plan{
-    color:#F1EAD2;
-    font-size: 1.1vw;
-    font-weight: 500;
-}
-.allCommercial{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 0.33;
-    gap: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.formBox{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:40px;
-    align-items:flex-end;
-    /* margin-top: 50px;
-    margin-bottom: 50px;
-    height: auto; */
-    align-items: center;
-    border-radius: 30px;
-}
-.timeBox{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 0.33;
-}
-.timRange{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-.oStatus{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 0.33;
-}
-.row{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex:0.33;
-}
-select{
-    outline: none;
-    border: none;
-    width: 180px;
-    height: 30px;
-    padding: 0px 5px;
-}
-input{
-    outline: none;
-    border: none;
-    width:140px;
-    max-width:100%;
-    height: 30px;
-}
-input[type="date"]{
-   padding:0px 10px;
-}
-.agBtn button{
-    width: 120px;
-    height: 35px;
-    border-radius: 17px;
-    border: none;
-    background-color: #4e6959;
-    color: #F1EAD2;
-    font-size: 1vw;
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
-}
-/* @media (max-width:768px){
-.formBox{
-    flex-direction:column;
-    align-items:center;
-}
-.timeRange{
-    justify-content:center;
-}
-.fiContainer{
-    flex-direction:column;
-}
-} */
 </style>
