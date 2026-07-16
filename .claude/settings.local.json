@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer create-project *)",
+      "Bash(composer config *)",
+      "Bash(composer install *)"
+    ]
+  }
+}
