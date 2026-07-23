@@ -2,9 +2,10 @@
 
 namespace App\Models\WJC;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Relative extends Model
+class Relative extends Authenticatable implements JWTSubject
 {
     protected $table = 'relatives';
     public $timestamps = false;
@@ -25,6 +26,16 @@ class Relative extends Model
 
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return ['guard' => 'relative'];
+    }
 
     public function users()
     {

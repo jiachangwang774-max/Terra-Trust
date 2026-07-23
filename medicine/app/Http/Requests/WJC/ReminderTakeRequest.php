@@ -14,7 +14,7 @@ class ReminderTakeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|integer|in:1,2,3',
+            'status' => ['required', 'integer', 'in:1,2,3'],
             'note'   => 'nullable|string|max:500',
         ];
     }

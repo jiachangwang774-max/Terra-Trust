@@ -19,17 +19,14 @@ class ReminderController extends Controller
 
     public function store(ReminderStoreRequest $request): JsonResponse
     {
-        $reminder = $this->reminderService->create(
-            $request->validated(),
-            auth()->id()
-        );
+        $reminder = $this->reminderService->create($request->validated(), auth('api')->id());
 
         return Result::success('提醒创建成功', ['remind_id' => $reminder->id]);
     }
 
     public function today(): JsonResponse
     {
-        $data = $this->reminderService->todayReminders(auth()->id());
+        $data = $this->reminderService->todayReminders(auth('api')->id());
 
         return Result::success('成功', $data);
     }
@@ -40,7 +37,7 @@ class ReminderController extends Controller
             $id,
             $request->validated('status'),
             $request->validated('note'),
-            auth()->id()
+            auth('api')->id()
         );
 
         return Result::success('记录保存成功');
@@ -48,21 +45,21 @@ class ReminderController extends Controller
 
     public function detail(int $id): JsonResponse
     {
-        $data = $this->reminderService->detail($id, auth()->id());
+        $data = $this->reminderService->detail($id, auth('api')->id());
 
         return Result::success('成功', $data);
     }
 
     public function update(int $id, ReminderUpdateRequest $request): JsonResponse
     {
-        $this->reminderService->update($id, $request->validated(), auth()->id());
+        $this->reminderService->update($id, $request->validated(), auth('api')->id());
 
         return Result::success('提醒修改成功');
     }
 
     public function delete(int $id): JsonResponse
     {
-        $this->reminderService->delete($id, auth()->id());
+        $this->reminderService->delete($id, auth('api')->id());
 
         return Result::success('提醒删除成功');
     }
@@ -72,7 +69,7 @@ class ReminderController extends Controller
         $this->reminderService->batchStatus(
             $request->validated('ids'),
             $request->validated('is_active'),
-            auth()->id()
+            auth('api')->id()
         );
 
         return Result::success('批量操作成功');
@@ -83,7 +80,7 @@ class ReminderController extends Controller
         $page = (int) $request->input('page', 1);
         $size = (int) $request->input('size', 10);
 
-        $paginator = $this->reminderService->allList(auth()->id(), $page, $size);
+        $paginator = $this->reminderService->allList(auth('api')->id(), $page, $size);
 
         return Result::success('成功', [
             'total' => $paginator->total(),

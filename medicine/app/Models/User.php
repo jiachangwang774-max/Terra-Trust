@@ -2,15 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
     protected $table = 'users';
     public $timestamps = false;
 
@@ -33,10 +29,20 @@ class User extends Authenticatable
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+
     public function relatives()
     {
         return $this->belongsToMany(
-            Relative::class,
+            \App\Models\WJC\Relative::class,
             'user_relatives',
             'user_id',
             'relative_id'
@@ -45,26 +51,26 @@ class User extends Authenticatable
 
     public function medicines()
     {
-        return $this->hasMany(Medicine::class, 'user_id');
+        return $this->hasMany(\App\Models\WJC\Medicine::class, 'user_id');
     }
 
     public function reminders()
     {
-        return $this->hasMany(Reminder::class, 'user_id');
+        return $this->hasMany(\App\Models\WJC\Reminder::class, 'user_id');
     }
 
     public function medicationRecords()
     {
-        return $this->hasMany(MedicationRecord::class, 'user_id');
+        return $this->hasMany(\App\Models\WJC\MedicationRecord::class, 'user_id');
     }
 
     public function healthRecords()
     {
-        return $this->hasMany(HealthRecord::class, 'user_id');
+        return $this->hasMany(\App\Models\WJC\HealthRecord::class, 'user_id');
     }
 
     public function notices()
     {
-        return $this->hasMany(Notice::class, 'user_id');
+        return $this->hasMany(\App\Models\WJC\Notice::class, 'user_id');
     }
 }

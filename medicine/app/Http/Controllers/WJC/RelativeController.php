@@ -17,21 +17,21 @@ class RelativeController extends Controller
 
     public function bind(RelativeBindRequest $request): JsonResponse
     {
-        $this->relativeService->bind($request->validated(), auth()->id());
+        $this->relativeService->bind($request->validated(), auth('api')->id());
 
         return Result::success('绑定申请已发送');
     }
 
     public function list(): JsonResponse
     {
-        $data = $this->relativeService->list(auth()->id());
+        $data = $this->relativeService->list(auth('api')->id());
 
         return Result::success('成功', $data);
     }
 
     public function unbind(int $bindId): JsonResponse
     {
-        $this->relativeService->unbind($bindId, auth()->id());
+        $this->relativeService->unbind($bindId, auth('api')->id());
 
         return Result::success('亲属解绑成功');
     }
@@ -41,7 +41,7 @@ class RelativeController extends Controller
         $this->relativeService->updatePermission(
             $bindId,
             $request->validated('permission'),
-            auth()->id()
+            auth('api')->id()
         );
 
         return Result::success('权限修改成功');
@@ -59,7 +59,9 @@ class RelativeController extends Controller
 
     public function userTodayRemind(int $userId): JsonResponse
     {
-        $data = $this->relativeService->userTodayRemind($userId, auth()->id());
+        $relative = auth('relative_api')->user();
+
+        $data = $this->relativeService->userTodayRemind($userId, $relative->id);
 
         return Result::success('成功', $data);
     }

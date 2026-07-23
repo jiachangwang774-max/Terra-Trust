@@ -18,7 +18,7 @@ class NoticeController extends Controller
         $page = (int) $request->input('page', 1);
         $size = (int) $request->input('size', 10);
 
-        $paginator = $this->noticeService->list(auth()->id(), $page, $size);
+        $paginator = $this->noticeService->list(auth('api')->id(), $page, $size);
 
         return Result::success('成功', [
             'total' => $paginator->total(),
@@ -28,21 +28,21 @@ class NoticeController extends Controller
 
     public function read(int $id): JsonResponse
     {
-        $this->noticeService->markRead($id, auth()->id());
+        $this->noticeService->markRead($id, auth('api')->id());
 
         return Result::success('操作成功');
     }
 
     public function readAll(): JsonResponse
     {
-        $this->noticeService->markAllRead(auth()->id());
+        $this->noticeService->markAllRead(auth('api')->id());
 
         return Result::success('全部已读成功');
     }
 
     public function delete(int $id): JsonResponse
     {
-        $this->noticeService->delete($id, auth()->id());
+        $this->noticeService->delete($id, auth('api')->id());
 
         return Result::success('消息删除成功');
     }

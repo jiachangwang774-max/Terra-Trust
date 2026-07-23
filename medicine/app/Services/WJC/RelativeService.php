@@ -37,7 +37,7 @@ class RelativeService
             $relative = Relative::firstOrCreate(
                 ['phone' => $targetUser->phone],
                 [
-                    'username' => $targetUser->username . '_relative',
+                    'username' => $targetUser->username . '_r',
                     'password' => $targetUser->password,
                     'real_name'=> $targetUser->real_name,
                     'status'   => 1,
@@ -122,28 +122,38 @@ class RelativeService
 
     public function login(string $username, string $password): array
     {
-        $relative = Relative::where('username', $username)
-            ->orWhere('phone', $username)
-            ->first();
+        $token = auth('relative_api')->attempt([
+            'username' => $username,
+            'password' => $password,
+        ]);
 
-        if (!$relative || !Hash::check($password, $relative->password)) {
+        if (!$token) {
+            $token = auth('relative_api')->attempt([
+                'phone'    => $username,
+                'password' => $password,
+            ]);
+        }
+
+        if (!$token) {
             throw new BusinessException('用户名或密码错误');
         }
 
+        $relative = auth('relative_api')->user();
+
         if ($relative->status !== 1) {
+            auth('relative_api')->logout();
             throw new BusinessException('账号已被禁用');
         }
 
         $relative->update(['last_login_time' => now()]);
 
-        $token = $relative->createToken('relative-token')->plainTextToken;
         $bindCount = UserRelative::where('relative_id', $relative->id)
             ->where('bind_status', 1)
             ->count();
 
         return [
             'token'           => $token,
-            'expire_at'       => now()->addDays(7)->format('Y-m-d\TH:i:s'),
+            'expire_at'       => now()->addMinutes(config('jwt.ttl'))->format('Y-m-d\TH:i:s'),
             'bind_user_count' => $bindCount,
         ];
     }

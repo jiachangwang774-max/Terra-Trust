@@ -16,14 +16,14 @@ class RecordController extends Controller
     public function byDate(Request $request): JsonResponse
     {
         $date = $request->input('date', now()->format('Y-m-d'));
-        $data = $this->recordService->byDate(auth()->id(), $date);
+        $data = $this->recordService->byDate(auth('api')->id(), $date);
 
         return Result::success('成功', $data);
     }
 
     public function detail(int $id): JsonResponse
     {
-        $data = $this->recordService->detail($id, auth()->id());
+        $data = $this->recordService->detail($id, auth('api')->id());
 
         return Result::success('成功', $data);
     }
@@ -33,7 +33,7 @@ class RecordController extends Controller
         $year  = (int) $request->input('year', now()->year);
         $month = (int) $request->input('month', now()->month);
 
-        $data = $this->recordService->monthStat(auth()->id(), $year, $month);
+        $data = $this->recordService->monthStat(auth('api')->id(), $year, $month);
 
         return Result::success('成功', $data);
     }
@@ -43,7 +43,7 @@ class RecordController extends Controller
         $page = (int) $request->input('page', 1);
         $size = (int) $request->input('size', 10);
 
-        $paginator = $this->recordService->missList(auth()->id(), $page, $size);
+        $paginator = $this->recordService->missList(auth('api')->id(), $page, $size);
 
         return Result::success('成功', [
             'total' => $paginator->total(),
@@ -61,7 +61,7 @@ class RecordController extends Controller
         }
 
         $records = \App\Models\WJC\MedicationRecord::with('medicine:id,name')
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth('api')->id())
             ->whereBetween('plan_time', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('plan_time', 'asc')
             ->get()

@@ -16,7 +16,7 @@ class HealthController extends Controller
 
     public function store(HealthRecordStoreRequest $request): JsonResponse
     {
-        $record = $this->healthService->create($request->validated(), auth()->id());
+        $record = $this->healthService->create($request->validated(), auth('api')->id());
 
         return Result::success('新增成功', ['health_id' => $record->id]);
     }
@@ -26,7 +26,7 @@ class HealthController extends Controller
         $page = (int) $request->input('page', 1);
         $size = (int) $request->input('size', 10);
 
-        $paginator = $this->healthService->list(auth()->id(), $page, $size);
+        $paginator = $this->healthService->list(auth('api')->id(), $page, $size);
 
         return Result::success('成功', [
             'total' => $paginator->total(),
@@ -36,7 +36,7 @@ class HealthController extends Controller
 
     public function delete(int $id): JsonResponse
     {
-        $this->healthService->delete($id, auth()->id());
+        $this->healthService->delete($id, auth('api')->id());
 
         return Result::success('健康记录删除成功');
     }

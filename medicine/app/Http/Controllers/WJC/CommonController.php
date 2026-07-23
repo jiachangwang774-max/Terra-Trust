@@ -5,6 +5,7 @@ namespace App\Http\Controllers\WJC;
 use App\Support\Result;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CommonController extends Controller
 {
@@ -20,9 +21,9 @@ class CommonController extends Controller
             return Result::error(\App\Enums\ResponseCode::PARAM_ERROR, '文件上传失败');
         }
 
-        $path = $file->store('uploads/' . date('Ymd'), 'public');
+        $path = $file->store('uploads/' . date('Ymd'), 'oss');
 
-        $url = asset('storage/' . $path);
+        $url = Storage::disk('oss')->url($path);
 
         return Result::success('上传成功', ['file_url' => $url]);
     }
