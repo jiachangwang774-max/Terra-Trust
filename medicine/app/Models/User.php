@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    use Notifiable;
+
     protected $table = 'users';
     public $timestamps = false;
 
@@ -29,7 +32,7 @@ class User extends Authenticatable implements JWTSubject
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
